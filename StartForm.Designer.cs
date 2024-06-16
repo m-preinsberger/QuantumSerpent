@@ -2,124 +2,99 @@
 {
     partial class StartForm
     {
-        private System.ComponentModel.IContainer components = null;
-        private System.Windows.Forms.Button singleplayerButton;
-        private System.Windows.Forms.Button multiplayerButton;
-        private System.Windows.Forms.Button modsAndTexturePacksButton;
-        private System.Windows.Forms.Button optionsButton;
-        private System.Windows.Forms.Label headerLabel;
-        private System.Windows.Forms.LinkLabel githubLink;
+        private Label headerLabel;
+        private Button singleplayerButton;
+        private Button multiplayerButton;
+        private Button modsAndTexturePacksButton;
+        private Button optionsButton;
+        private LinkLabel githubLinkLabel;
 
-        /// <summary>
-        /// Clean up any resources being used.
-        /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing && (components != null))
-            {
-                components.Dispose();
-            }
-            base.Dispose(disposing);
-        }
-
-        #region Windows Form Designer generated code
-
-        /// <summary>
-        /// Required method for Designer support - do not modify
-        /// the contents of this method with the code editor.
-        /// </summary>
         private void InitializeComponent()
         {
-            headerLabel = new Label();
-            githubLink = new LinkLabel();
-            singleplayerButton = new Button();
-            multiplayerButton = new Button();
-            modsAndTexturePacksButton = new Button();
-            optionsButton = new Button();
-            SuspendLayout();
+            this.headerLabel = new Label();
+            this.singleplayerButton = new Button();
+            this.multiplayerButton = new Button();
+            this.modsAndTexturePacksButton = new Button();
+            this.optionsButton = new Button();
+            this.githubLinkLabel = new LinkLabel();
+            this.SuspendLayout();
             // 
             // headerLabel
             // 
-            headerLabel.AutoSize = true;
-            headerLabel.Font = new Font("Arial", 16F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            headerLabel.Location = new Point(100, 10);
-            headerLabel.Name = "headerLabel";
-            headerLabel.Size = new Size(192, 26);
-            headerLabel.TabIndex = 0;
-            headerLabel.Text = "Quantum Serpent";
-            headerLabel.TextAlign = ContentAlignment.MiddleCenter;
-            // 
-            // githubLink
-            // 
-            githubLink.AutoSize = true;
-            githubLink.Location = new Point(172, 230);
-            githubLink.Name = "githubLink";
-            githubLink.Size = new Size(45, 15);
-            githubLink.TabIndex = 4;
-            githubLink.TabStop = true;
-            githubLink.Text = "GitHub";
-            githubLink.TextAlign = ContentAlignment.MiddleCenter;
-            githubLink.LinkClicked += GithubLink_LinkClicked;
+            this.headerLabel.Font = new Font("Microsoft Sans Serif", 18F, FontStyle.Bold, GraphicsUnit.Point, ((byte)(0)));
+            this.headerLabel.Location = new Point(12, 9);
+            this.headerLabel.Name = "headerLabel";
+            this.headerLabel.Size = new Size(360, 30);
+            this.headerLabel.TabIndex = 0;
+            this.headerLabel.Text = "Quantum Serpent";
+            this.headerLabel.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // singleplayerButton
             // 
-            singleplayerButton.Location = new Point(100, 62);
-            singleplayerButton.Name = "singleplayerButton";
-            singleplayerButton.Size = new Size(192, 34);
-            singleplayerButton.TabIndex = 5;
-            singleplayerButton.Text = "Singleplayer";
-            singleplayerButton.UseVisualStyleBackColor = true;
-            singleplayerButton.Click += SingleplayerButton_Click;
+            this.singleplayerButton.Location = new Point(125, 60);
+            this.singleplayerButton.Name = "singleplayerButton";
+            this.singleplayerButton.Size = new Size(150, 40);
+            this.singleplayerButton.TabIndex = 1;
+            this.singleplayerButton.Text = "Singleplayer";
+            this.singleplayerButton.UseVisualStyleBackColor = true;
+            this.singleplayerButton.Click += new EventHandler(this.SingleplayerButton_Click);
             // 
             // multiplayerButton
             // 
-            multiplayerButton.Location = new Point(100, 102);
-            multiplayerButton.Name = "multiplayerButton";
-            multiplayerButton.Size = new Size(192, 34);
-            multiplayerButton.TabIndex = 6;
-            multiplayerButton.Text = "Multiplayer";
-            multiplayerButton.UseVisualStyleBackColor = true;
-            multiplayerButton.Click += MultiplayerButton_Click;
+            this.multiplayerButton.Location = new Point(125, 110);
+            this.multiplayerButton.Name = "multiplayerButton";
+            this.multiplayerButton.Size = new Size(150, 40);
+            this.multiplayerButton.TabIndex = 2;
+            this.multiplayerButton.Text = "Multiplayer";
+            this.multiplayerButton.UseVisualStyleBackColor = true;
+            this.multiplayerButton.Click += new EventHandler(this.MultiplayerButton_Click);
             // 
             // modsAndTexturePacksButton
             // 
-            modsAndTexturePacksButton.Location = new Point(100, 142);
-            modsAndTexturePacksButton.Name = "modsAndTexturePacksButton";
-            modsAndTexturePacksButton.Size = new Size(192, 34);
-            modsAndTexturePacksButton.TabIndex = 7;
-            modsAndTexturePacksButton.Text = "Mods and Texture Packs";
-            modsAndTexturePacksButton.UseVisualStyleBackColor = true;
-            modsAndTexturePacksButton.Click += ModsAndTexturePacksButton_Click;
+            this.modsAndTexturePacksButton.Location = new Point(125, 160);
+            this.modsAndTexturePacksButton.Name = "modsAndTexturePacksButton";
+            this.modsAndTexturePacksButton.Size = new Size(150, 40);
+            this.modsAndTexturePacksButton.TabIndex = 3;
+            this.modsAndTexturePacksButton.Text = "Mods and Texture Packs";
+            this.modsAndTexturePacksButton.UseVisualStyleBackColor = true;
+            this.modsAndTexturePacksButton.Click += new EventHandler(this.ModsAndTexturePacksButton_Click);
             // 
             // optionsButton
             // 
-            optionsButton.Location = new Point(100, 182);
-            optionsButton.Name = "optionsButton";
-            optionsButton.Size = new Size(192, 34);
-            optionsButton.TabIndex = 8;
-            optionsButton.Text = "Options";
-            optionsButton.UseVisualStyleBackColor = true;
-            optionsButton.Click += OptionsButton_Click;
+            this.optionsButton.Location = new Point(125, 210);
+            this.optionsButton.Name = "optionsButton";
+            this.optionsButton.Size = new Size(150, 40);
+            this.optionsButton.TabIndex = 4;
+            this.optionsButton.Text = "Options";
+            this.optionsButton.UseVisualStyleBackColor = true;
+            this.optionsButton.Click += new EventHandler(this.OptionsButton_Click);
+            // 
+            // githubLinkLabel
+            // 
+            this.githubLinkLabel.AutoSize = true;
+            this.githubLinkLabel.Location = new Point(170, 270);
+            this.githubLinkLabel.Name = "githubLinkLabel";
+            this.githubLinkLabel.Size = new Size(40, 13);
+            this.githubLinkLabel.TabIndex = 5;
+            this.githubLinkLabel.TabStop = true;
+            this.githubLinkLabel.Text = "GitHub";
+            this.githubLinkLabel.LinkClicked += new LinkLabelLinkClickedEventHandler(this.GithubLinkLabel_LinkClicked);
             // 
             // StartForm
             // 
-            ClientSize = new Size(400, 253);
-            Controls.Add(headerLabel);
-            Controls.Add(githubLink);
-            Controls.Add(singleplayerButton);
-            Controls.Add(multiplayerButton);
-            Controls.Add(modsAndTexturePacksButton);
-            Controls.Add(optionsButton);
-            FormBorderStyle = FormBorderStyle.FixedDialog;
-            MaximizeBox = false;
-            Name = "StartForm";
-            StartPosition = FormStartPosition.CenterScreen;
-            Text = "Quantum Serpent";
-            ResumeLayout(false);
-            PerformLayout();
+            this.AutoScaleDimensions = new SizeF(6F, 13F);
+            this.AutoScaleMode = AutoScaleMode.Font;
+            this.ClientSize = new Size(384, 311);
+            this.Controls.Add(this.githubLinkLabel);
+            this.Controls.Add(this.optionsButton);
+            this.Controls.Add(this.modsAndTexturePacksButton);
+            this.Controls.Add(this.multiplayerButton);
+            this.Controls.Add(this.singleplayerButton);
+            this.Controls.Add(this.headerLabel);
+            this.Name = "StartForm";
+            this.Text = "Quantum Serpent";
+            this.ResumeLayout(false);
+            this.PerformLayout();
         }
-
-        #endregion
     }
 }

@@ -50,7 +50,7 @@ namespace QuantumSerpent
         public Color Player2BodyColor { get; set; } = Color.Yellow;
         public int InitialPlayerLength { get; set; } = 5;
         public string CurrentMode { get; set; } = "Singleplayer";
-        public int AIPlayers { get; set; } = 0;
+        public int AIPlayers { get; set; } = 0; // Anzahl der AI-Spieler
         public int FPS { get; set; } = 60;
         public int AppleCount { get; set; } = 5;
         public int FoodGrowMultiplier { get; set; } = 1;

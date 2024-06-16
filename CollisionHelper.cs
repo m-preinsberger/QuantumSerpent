@@ -1,4 +1,8 @@
-﻿namespace QuantumSerpent
+﻿using System.Collections.Generic;
+using System.Drawing;
+using System.Linq;
+
+namespace QuantumSerpent
 {
     public static class CollisionHelper
     {
@@ -6,56 +10,56 @@
         {
             None,
             Self,
-            OtherPlayer,
+            Player,
             Wall
         }
 
-        public static bool CheckCollision(Rectangle rect1, Rectangle rect2)
+        public static CollisionResult CheckCollisions(Player player, List<Player> players, Size boardSize)
         {
-            return rect1.IntersectsWith(rect2);
-        }
-
-
-        public static (CollisionType Type, string Message) CheckCollisions(Player player, List<Player> allPlayers, Size boardSize, List<Point> foodPositions, List<Point> obstacles)
-        {
-            Point headPosition = player.BodyParts[0];
-
-            // Check wall collision
-            if (headPosition.X < 0 || headPosition.X >= boardSize.Width || headPosition.Y < 0 || headPosition.Y >= boardSize.Height)
+            // Check collision with the board boundaries
+            var head = player.BodyParts[0];
+            if (head.X < 0 || head.Y < 0 || head.X >= boardSize.Width || head.Y >= boardSize.Height)
             {
-                return (CollisionType.Wall, $"{player.Name} hit the wall!");
+                return new CollisionResult { Type = CollisionType.Wall, Message = $"{player.Name} hit the wall!" };
             }
 
-            // Check self collision, skip the head when comparing
+            // Check for collision with self
             for (int i = 1; i < player.BodyParts.Count; i++)
             {
-                if (player.BodyParts[i] == headPosition)
+                if (player.BodyParts[i] == head)
                 {
-                    return (CollisionType.Self, $"{player.Name} collided with itself!");
+                    return new CollisionResult { Type = CollisionType.Player, Message = $"{player.Name} collided with itself!" };
                 }
             }
 
             // Check collision with other players
-            foreach (var otherPlayer in allPlayers)
+            foreach (var otherPlayer in players)
             {
                 if (otherPlayer != player)
                 {
                     foreach (var part in otherPlayer.BodyParts)
                     {
-                        if (part == headPosition)
+                        if (part == head)
                         {
-                            return (CollisionType.OtherPlayer, $"{player.Name} collided with {otherPlayer.Name}!");
+                            return new CollisionResult { Type = CollisionType.Player, Message = $"{player.Name} collided with {otherPlayer.Name}!" };
                         }
                     }
                 }
             }
 
-            return (CollisionType.None, string.Empty);
+            return new CollisionResult { Type = CollisionType.None, Message = string.Empty };
         }
+
 
         public static bool CheckFoodCollision(Point playerHead, Point foodPosition)
         {
             return playerHead == foodPosition;
         }
+    }
+
+    public class CollisionResult
+    {
+        public CollisionHelper.CollisionType Type { get; set; }
+        public string Message { get; set; }
     }
 }

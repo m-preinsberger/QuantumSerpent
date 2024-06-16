@@ -1,3 +1,9 @@
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Linq;
+using System.Windows.Forms;
+
 namespace QuantumSerpent
 {
     public partial class MainForm : Form
@@ -5,19 +11,20 @@ namespace QuantumSerpent
         private System.Windows.Forms.Timer gameTimer;
         private PictureBox gameBoard;
         private Label statusLabel;
-        private List<Player> players;
-        private List<Food> foodItems;
+        private List<Player> players = new List<Player>();
+        private List<Food> foodItems = new List<Food>();
         private Bitmap offscreenBitmap;
         private Graphics offscreenGraphics;
         private bool isGameOver = false;
         private string gameMode;
+        private int aiPlayerCount;
         private Random random;
         private int fps;
         private int appleCount;
         private int foodGrowMultiplier;
-        private int aiPlayerCount = 0; // Number of AI players
-        private float moveSpeed = 2.0f; // Speed in pixels per tick
+        private float moveSpeed = 2.0f;
 
+        // Konstruktor mit zwei Parametern
         public MainForm(string selectedGameMode, int aiPlayers)
         {
             gameMode = selectedGameMode;
@@ -30,12 +37,14 @@ namespace QuantumSerpent
         private void InitializeGame()
         {
             var settings = GameSettingsManager.Load();
-            players = new List<Player>();
 
             fps = settings.FPS;
             appleCount = settings.AppleCount;
             foodGrowMultiplier = settings.FoodGrowMultiplier;
             gameTimer.Interval = 1000 / fps;
+
+            players.Clear();
+            foodItems.Clear();
 
             if (gameMode == "Singleplayer")
             {
@@ -47,19 +56,18 @@ namespace QuantumSerpent
             }
 
             // Add AI players
-            for (int i = 0; i < aiPlayerCount; i++)
+            for (int i = 0; i < settings.AIPlayers; i++)
             {
                 players.Add(new AIPlayer(
                     $"AIPlayer{i + 1}",
-                    Color.Yellow, // Head color for AI
-                    Color.Green, // Body color for AI
-                    new Point(random.Next(100, 700), random.Next(100, 500)),
+                    Color.Yellow,
+                    Color.Green,
+                    GenerateSafeSpawnPoint(new Point(0, 0), gameBoard.Size),
                     Direction.Right,
-                    5 // Initial length
+                    settings.InitialPlayerLength
                 ));
             }
 
-            foodItems = new List<Food>();
             for (int i = 0; i < appleCount; i++)
             {
                 foodItems.Add(GenerateRandomFood());
@@ -70,73 +78,77 @@ namespace QuantumSerpent
 
         private Food GenerateRandomFood()
         {
-            int x = random.Next(0, gameBoard.Width / 20) * 20; // Align to grid
-            int y = random.Next(0, gameBoard.Height / 20) * 20;
-            return new Apple(new Point(x, y)); // Use concrete class like 'Apple'
+            int x = random.Next(0, gameBoard.Width - 20);
+            int y = random.Next(0, gameBoard.Height - 20);
+            return new Apple(new Point(x, y));
         }
 
         private void InitializeSinglePlayer(GameSettings settings)
         {
-            if (!string.IsNullOrWhiteSpace(settings.Player1Name))
-            {
-                players.Add(new Player(
-                    settings.Player1Name,
-                    settings.Player1HeadColor,
-                    settings.Player1BodyColor,
-                    new Point(100, 100),
-                    Direction.Right,
-                    settings.InitialPlayerLength
-                ));
-            }
-            else
-            {
-                MessageBox.Show("Please provide a name for Player 1.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                this.Close();
-            }
+            var player1StartPos = new Point(100, 200);
+            players.Add(new Player(
+                settings.Player1Name,
+                settings.Player1HeadColor,
+                settings.Player1BodyColor,
+                player1StartPos,
+                Direction.Right,
+                settings.InitialPlayerLength
+            ));
         }
 
         private void InitializeMultiPlayer(GameSettings settings)
         {
-            InitializeSinglePlayer(settings); // Add Player 1
+            // Initialize Player 1
+            players.Add(new Player(
+                settings.Player1Name,
+                settings.Player1HeadColor,
+                settings.Player1BodyColor,
+                new Point(100, 200), // Start position for Player 1
+                Direction.Right,
+                settings.InitialPlayerLength
+            ));
 
-            if (!string.IsNullOrWhiteSpace(settings.Player2Name))
+            // Initialize Player 2 at a different start position
+            players.Add(new Player(
+                settings.Player2Name,
+                settings.Player2HeadColor,
+                settings.Player2BodyColor,
+                new Point(400, 400), // Adjusted start position for Player 2
+                Direction.Left,
+                settings.InitialPlayerLength
+            ));
+        }
+
+        private Point GenerateSafeSpawnPoint(Point otherPlayerPos, Size boardSize)
+        {
+            int safeDistance = 200;
+            Point newSpawnPoint;
+            Random rand = new Random();
+            do
             {
-                players.Add(new Player(
-                    settings.Player2Name,
-                    settings.Player2HeadColor,
-                    settings.Player2BodyColor,
-                    new Point(200, 200),
-                    Direction.Left,
-                    settings.InitialPlayerLength
-                ));
-            }
-            else
-            {
-                MessageBox.Show("Please provide a name for Player 2.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                this.Close();
-            }
+                int x = rand.Next(safeDistance, boardSize.Width - safeDistance);
+                int y = rand.Next(safeDistance, boardSize.Height - safeDistance);
+                newSpawnPoint = new Point(x, y);
+            } while (Math.Abs(newSpawnPoint.X - otherPlayerPos.X) < safeDistance &&
+                     Math.Abs(newSpawnPoint.Y - otherPlayerPos.Y) < safeDistance);
+
+            return newSpawnPoint;
         }
 
         private void GameBoard_Paint(object sender, PaintEventArgs e)
         {
-            if (players == null || foodItems == null || offscreenGraphics == null) return;
+            if (players == null) return;
 
             offscreenGraphics.Clear(Color.LightGray);
-
-            // Draw players
             foreach (var player in players)
             {
-                if (player != null)
+                foreach (var part in player.BodyParts)
                 {
-                    foreach (var part in player.BodyParts)
-                    {
-                        offscreenGraphics.FillRectangle(new SolidBrush(player.BodyColor), new Rectangle(part, new Size(20, 20)));
-                    }
-                    offscreenGraphics.FillRectangle(new SolidBrush(player.HeadColor), new Rectangle(player.BodyParts[0], new Size(20, 20)));
+                    offscreenGraphics.FillRectangle(new SolidBrush(player.BodyColor), new Rectangle(part, new Size(20, 20)));
                 }
+                offscreenGraphics.FillRectangle(new SolidBrush(player.HeadColor), new Rectangle(player.BodyParts[0], new Size(20, 20)));
             }
 
-            // Draw food
             foreach (var food in foodItems)
             {
                 food.Draw(offscreenGraphics);
@@ -163,13 +175,11 @@ namespace QuantumSerpent
                     MovePlayer(player);
                 }
 
-                player.UpdateLastBodyPartPosition(); // Save last body part position
+                player.UpdateLastBodyPartPosition();
 
-                // Check if player has eaten a Food object
                 CheckFoodConsumption(player);
 
-                // Check for collisions
-                var collisionResult = CollisionHelper.CheckCollisions(player, players.ToList(), gameBoard.Size, foodPositions, obstacles);
+                var collisionResult = CollisionHelper.CheckCollisions(player, players, gameBoard.Size);
                 if (collisionResult.Type != CollisionHelper.CollisionType.None)
                 {
                     EndGame(collisionResult.Message);
@@ -220,7 +230,7 @@ namespace QuantumSerpent
                 Food food = foodItems[i];
                 Rectangle foodRect = new Rectangle(food.Position, new Size(20, 20));
 
-                if (CollisionHelper.CheckCollision(playerHeadRect, foodRect))
+                if (playerHeadRect.IntersectsWith(foodRect))
                 {
                     for (int j = 0; j < foodGrowMultiplier; j++)
                     {
@@ -232,7 +242,6 @@ namespace QuantumSerpent
                 }
             }
         }
-
 
         private void EndGame(string message)
         {
