@@ -40,6 +40,8 @@
             player1NameLabel = new Label();
             player2NameLabel = new Label();
             colorDialog = new ColorDialog();
+            DifficultyLabel = new Label();
+            dificultyCBox = new ComboBox();
             ((System.ComponentModel.ISupportInitialize)aiPlayersNumericUpDown).BeginInit();
             ((System.ComponentModel.ISupportInitialize)initialPlayerLengthNumericUpDown).BeginInit();
             ((System.ComponentModel.ISupportInitialize)fpsNumericUpDown).BeginInit();
@@ -159,7 +161,7 @@
             // 
             // saveButton
             // 
-            saveButton.Location = new Point(58, 381);
+            saveButton.Location = new Point(58, 446);
             saveButton.Margin = new Padding(4, 3, 4, 3);
             saveButton.Name = "saveButton";
             saveButton.Size = new Size(117, 27);
@@ -170,7 +172,7 @@
             // 
             // backButton
             // 
-            backButton.Location = new Point(292, 381);
+            backButton.Location = new Point(292, 446);
             backButton.Margin = new Padding(4, 3, 4, 3);
             backButton.Name = "backButton";
             backButton.Size = new Size(117, 27);
@@ -289,11 +291,33 @@
             player2NameLabel.TabIndex = 23;
             player2NameLabel.Text = "Player 2 Name";
             // 
+            // DifficultyLabel
+            // 
+            DifficultyLabel.AutoSize = true;
+            DifficultyLabel.Location = new Point(58, 372);
+            DifficultyLabel.Margin = new Padding(4, 0, 4, 0);
+            DifficultyLabel.Name = "DifficultyLabel";
+            DifficultyLabel.Size = new Size(55, 15);
+            DifficultyLabel.TabIndex = 25;
+            DifficultyLabel.Text = "Difficulty";
+            DifficultyLabel.Click += label1_Click;
+            // 
+            // dificultyCBox
+            // 
+            dificultyCBox.FormattingEnabled = true;
+            dificultyCBox.Items.AddRange(new object[] { "Easy", "Medium", "Hard" });
+            dificultyCBox.Location = new Point(175, 369);
+            dificultyCBox.Name = "dificultyCBox";
+            dificultyCBox.Size = new Size(121, 23);
+            dificultyCBox.TabIndex = 26;
+            // 
             // SettingsForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(467, 438);
+            ClientSize = new Size(467, 485);
+            Controls.Add(dificultyCBox);
+            Controls.Add(DifficultyLabel);
             Controls.Add(player2NameLabel);
             Controls.Add(player1NameLabel);
             Controls.Add(player2BodyColorLabel);
@@ -355,5 +379,7 @@
         private System.Windows.Forms.Label player1NameLabel;
         private System.Windows.Forms.Label player2NameLabel;
         private System.Windows.Forms.ColorDialog colorDialog;
+        private Label DifficultyLabel;
+        private ComboBox dificultyCBox;
     }
 }

@@ -76,9 +76,8 @@ namespace QuantumSerpent
             {
                 Direction = Direction.Down;
             }
-
             // Move player in the current direction
-            Move();
+            Move(Direction); // Pass the direction as an argument to the Move method
         }
     }
 }

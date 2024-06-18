@@ -23,8 +23,8 @@ namespace QuantumSerpent
         private int appleCount;
         private int foodGrowMultiplier;
         private float moveSpeed = 2.0f;
+        private Dictionary<string, int> playerScores = new Dictionary<string, int>();
 
-        // Konstruktor mit zwei Parametern
         public MainForm(string selectedGameMode, int aiPlayers)
         {
             gameMode = selectedGameMode;
@@ -45,6 +45,7 @@ namespace QuantumSerpent
 
             players.Clear();
             foodItems.Clear();
+            playerScores.Clear();
 
             if (gameMode == "Singleplayer")
             {
@@ -55,7 +56,6 @@ namespace QuantumSerpent
                 InitializeMultiPlayer(settings);
             }
 
-            // Add AI players
             for (int i = 0; i < settings.AIPlayers; i++)
             {
                 players.Add(new AIPlayer(
@@ -94,34 +94,35 @@ namespace QuantumSerpent
                 Direction.Right,
                 settings.InitialPlayerLength
             ));
+            playerScores[settings.Player1Name] = 0;
         }
 
         private void InitializeMultiPlayer(GameSettings settings)
         {
-            // Initialize Player 1
             players.Add(new Player(
                 settings.Player1Name,
                 settings.Player1HeadColor,
                 settings.Player1BodyColor,
-                new Point(100, 200), // Start position for Player 1
+                new Point(100, 200),
                 Direction.Right,
                 settings.InitialPlayerLength
             ));
+            playerScores[settings.Player1Name] = 0;
 
-            // Initialize Player 2 at a different start position
             players.Add(new Player(
                 settings.Player2Name,
                 settings.Player2HeadColor,
                 settings.Player2BodyColor,
-                new Point(400, 400), // Adjusted start position for Player 2
+                new Point(400, 400),
                 Direction.Left,
                 settings.InitialPlayerLength
             ));
+            playerScores[settings.Player2Name] = 0;
         }
 
         private Point GenerateSafeSpawnPoint(Point otherPlayerPos, Size boardSize)
         {
-            int safeDistance = 200;
+            int safeDistance = 100;
             Point newSpawnPoint;
             Random rand = new Random();
             do
@@ -152,6 +153,17 @@ namespace QuantumSerpent
             foreach (var food in foodItems)
             {
                 food.Draw(offscreenGraphics);
+            }
+
+            // Draw the scores
+            var font = new Font("Arial", 16);
+            var brush = new SolidBrush(Color.Black);
+            float yPosition = 10;
+
+            foreach (var player in players)
+            {
+                offscreenGraphics.DrawString($"{player.Name}: {playerScores[player.Name]}", font, brush, new PointF(10, yPosition));
+                yPosition += 30;
             }
 
             e.Graphics.DrawImage(offscreenBitmap, 0, 0);
@@ -239,6 +251,8 @@ namespace QuantumSerpent
 
                     foodItems.RemoveAt(i);
                     foodItems.Add(GenerateRandomFood());
+
+                    playerScores[player.Name] = player.BodyParts.Count;
                 }
             }
         }
@@ -249,10 +263,38 @@ namespace QuantumSerpent
             {
                 isGameOver = true;
                 MessageBox.Show(message, "Game Over", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                SaveHighscores();
                 gameTimer.Stop();
                 this.Close();
                 ShowStartForm();
             }
+        }
+
+        private void SaveHighscores()
+        {
+            var highscores = GameSettingsManager.LoadHighscores();
+
+            foreach (var player in players)
+            {
+                var existingHighscore = highscores.FirstOrDefault(h => h.PlayerName == player.Name);
+                if (existingHighscore != null)
+                {
+                    if (playerScores[player.Name] > existingHighscore.Score)
+                    {
+                        // Update the score if the new score is higher
+                        existingHighscore.Score = playerScores[player.Name];
+                    }
+                }
+                else
+                {
+                    // Add new entry if the player does not exist in the highscores list
+                    highscores.Add(new Highscore { PlayerName = player.Name, Score = playerScores[player.Name] });
+                }
+            }
+
+            // Sort highscores in descending order before saving
+            highscores = highscores.OrderByDescending(h => h.Score).ToList();
+            GameSettingsManager.SaveHighscores(highscores);
         }
 
         private void ShowStartForm()
@@ -308,6 +350,13 @@ namespace QuantumSerpent
                         players[1].Direction = Direction.Right;
                     break;
             }
+        }
+
+        private (IEnumerable<Position> avoid, IEnumerable<Food> food, (int, int)) GetWorldInfo()
+        {
+            var avoid = players.SelectMany(p => p.BodyParts).Select(p => new Position(p.X, p.Y)).ToList();
+            var food = foodItems.ToList();
+            return (avoid, food, (gameBoard.Width, gameBoard.Height));
         }
     }
 }

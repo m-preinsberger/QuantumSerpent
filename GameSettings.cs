@@ -23,6 +23,8 @@ public class GameSettings
     public int FPS { get; set; } = 60;
     public int AppleCount { get; set; } = 5;
     public int FoodGrowMultiplier { get; set; } = 1;
+    public string Difficulty { get; set; } = "Medium";
+
 
     public static GameSettings Load()
     {

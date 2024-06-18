@@ -84,6 +84,12 @@ namespace QuantumSerpent
             fpsNumericUpDown.Value = settings.FPS;
             appleCountNumericUpDown.Value = settings.AppleCount;
             foodGrowMultiplierNumericUpDown.Value = settings.FoodGrowMultiplier;
+
+        }
+
+        private void label1_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }
