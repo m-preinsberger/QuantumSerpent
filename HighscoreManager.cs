@@ -3,16 +3,19 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 
+// Represents a single highscore entry.
 public class HighscoreEntry
 {
     public string PlayerName { get; set; }
     public int Score { get; set; }
 }
 
+// Manages highscore operations: load, save, add.
 public static class HighscoreManager
 {
-    private const string HighscoreFilePath = "highscores.json";
+    private const string HighscoreFilePath = "highscores.json"; // File path for storing highscores.
 
+    // Loads highscores from file, or returns an empty list if file doesn't exist.
     public static List<HighscoreEntry> LoadHighscores()
     {
         if (File.Exists(HighscoreFilePath))
@@ -23,12 +26,14 @@ public static class HighscoreManager
         return new List<HighscoreEntry>();
     }
 
+    // Saves highscores to file.
     public static void SaveHighscores(List<HighscoreEntry> highscores)
     {
         var json = JsonSerializer.Serialize(highscores);
         File.WriteAllText(HighscoreFilePath, json);
     }
 
+    // Adds a new highscore and keeps the top 10 scores.
     public static void AddHighscore(string playerName, int score)
     {
         var highscores = LoadHighscores();

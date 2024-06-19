@@ -8,12 +8,14 @@ namespace QuantumSerpent
 {
     public partial class StartForm : Form
     {
+        // Constructor: Initializes the form and loads highscores.
         public StartForm()
         {
             InitializeComponent();
             LoadAndDisplayHighscores();
         }
 
+        // Starts a singleplayer game.
         private void SingleplayerButton_Click(object sender, EventArgs e)
         {
             var mainForm = new MainForm("Singleplayer", 0);
@@ -21,6 +23,7 @@ namespace QuantumSerpent
             mainForm.Show();
         }
 
+        // Starts a multiplayer game.
         private void MultiplayerButton_Click(object sender, EventArgs e)
         {
             var mainForm = new MainForm("Multiplayer", 0);
@@ -28,11 +31,13 @@ namespace QuantumSerpent
             mainForm.Show();
         }
 
+        // Displays a message for upcoming features.
         private void ModsAndTexturePacksButton_Click(object sender, EventArgs e)
         {
             MessageBox.Show("Mods and Texture Packs feature is coming soon!", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
+        // Opens the settings form.
         private void OptionsButton_Click(object sender, EventArgs e)
         {
             var settingsForm = new SettingsForm();
@@ -41,6 +46,7 @@ namespace QuantumSerpent
             this.Show();
         }
 
+        // Opens the project's GitHub page.
         private void GithubLinkLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
@@ -49,7 +55,8 @@ namespace QuantumSerpent
                 UseShellExecute = true
             });
         }
-        // Add this method to update the highscore list
+
+        // Updates the highscore list.
         private void UpdateHighscoreList()
         {
             var highscores = GameSettingsManager.LoadHighscores();
@@ -61,12 +68,14 @@ namespace QuantumSerpent
             }
         }
 
-        // Override the OnActivated method to update highscores when the form is shown
+        // Updates highscores when the form is shown.
         protected override void OnActivated(EventArgs e)
         {
             base.OnActivated(e);
             UpdateHighscoreList();
         }
+
+        // Loads and displays highscores.
         private void LoadAndDisplayHighscores()
         {
             var highscores = GameSettingsManager.LoadHighscores();

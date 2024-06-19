@@ -6,12 +6,14 @@ namespace QuantumSerpent
 {
     public partial class SettingsForm : Form
     {
+        // Constructor: Initializes the form and loads saved settings.
         public SettingsForm()
         {
             InitializeComponent();
             LoadSettings();
         }
 
+        // Opens a color dialog for Player 1's head color and updates the label background.
         private void ChooseColorPlayer1Head(object sender, EventArgs e)
         {
             if (colorDialog.ShowDialog() == DialogResult.OK)
@@ -20,6 +22,7 @@ namespace QuantumSerpent
             }
         }
 
+        // Opens a color dialog for Player 1's body color and updates the label background.
         private void ChooseColorPlayer1Body(object sender, EventArgs e)
         {
             if (colorDialog.ShowDialog() == DialogResult.OK)
@@ -28,6 +31,7 @@ namespace QuantumSerpent
             }
         }
 
+        // Opens a color dialog for Player 2's head color and updates the label background.
         private void ChooseColorPlayer2Head(object sender, EventArgs e)
         {
             if (colorDialog.ShowDialog() == DialogResult.OK)
@@ -36,6 +40,7 @@ namespace QuantumSerpent
             }
         }
 
+        // Opens a color dialog for Player 2's body color and updates the label background.
         private void ChooseColorPlayer2Body(object sender, EventArgs e)
         {
             if (colorDialog.ShowDialog() == DialogResult.OK)
@@ -44,6 +49,7 @@ namespace QuantumSerpent
             }
         }
 
+        // Saves the current settings and displays a confirmation message.
         private void SaveButton_Click(object sender, EventArgs e)
         {
             var settings = new GameSettings
@@ -67,11 +73,13 @@ namespace QuantumSerpent
             MessageBox.Show("Settings saved successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
+        // Closes the settings form.
         private void BackButton_Click(object sender, EventArgs e)
         {
             this.Close();
         }
 
+        // Loads settings and updates the form fields accordingly.
         private void LoadSettings()
         {
             var settings = GameSettingsManager.Load();
@@ -86,9 +94,9 @@ namespace QuantumSerpent
             fpsNumericUpDown.Value = settings.FPS;
             appleCountNumericUpDown.Value = settings.AppleCount;
             foodGrowMultiplierNumericUpDown.Value = settings.FoodGrowMultiplier;
-
         }
 
+        // Placeholder for label click event.
         private void label1_Click(object sender, EventArgs e)
         {
 

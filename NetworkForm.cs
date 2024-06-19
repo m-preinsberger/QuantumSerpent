@@ -9,8 +9,11 @@ namespace QuantumSerpent
 {
     public partial class NetworkForm : Form
     {
+        // Discovery port for UDP communication.
         private const int discoveryPort = 5001;
+        // UDP client for server discovery.
         private UdpClient discoveryClient;
+        // List of discovered servers.
         private List<DiscoveredServer> discoveredServers = new List<DiscoveredServer>();
 
         public NetworkForm()
@@ -19,6 +22,7 @@ namespace QuantumSerpent
             StartServerDiscovery();
         }
 
+        // Initializes server discovery.
         private void StartServerDiscovery()
         {
             discoveryClient = new UdpClient(discoveryPort);
@@ -26,6 +30,7 @@ namespace QuantumSerpent
             discoveryClient.BeginReceive(new AsyncCallback(OnDiscoveryMessageReceived), null);
         }
 
+        // Handles received discovery messages.
         private void OnDiscoveryMessageReceived(IAsyncResult ar)
         {
             IPEndPoint endpoint = new IPEndPoint(IPAddress.Any, discoveryPort);
@@ -46,6 +51,7 @@ namespace QuantumSerpent
             discoveryClient.BeginReceive(new AsyncCallback(OnDiscoveryMessageReceived), null);
         }
 
+        // Updates the server list box with discovered servers.
         private void UpdateServerListBox()
         {
             serverListBox.DataSource = null;
@@ -53,6 +59,7 @@ namespace QuantumSerpent
             serverListBox.DisplayMember = "ServerInfo";
         }
 
+        // Hosts a new game.
         private void HostGameButton_Click(object sender, EventArgs e)
         {
             int gamePort = 5000;
@@ -62,6 +69,7 @@ namespace QuantumSerpent
             mainForm.Show();
         }
 
+        // Joins a selected game.
         private void JoinGameButton_Click(object sender, EventArgs e)
         {
             if (serverListBox.SelectedItem is DiscoveredServer selectedServer)
@@ -84,6 +92,7 @@ namespace QuantumSerpent
             }
         }
 
+        // Refreshes the list of discovered servers.
         private void RefreshButton_Click(object sender, EventArgs e)
         {
             discoveredServers.Clear();
@@ -95,6 +104,7 @@ namespace QuantumSerpent
             broadcastClient.Send(message, message.Length, endPoint);
         }
 
+        // Represents a discovered server.
         private class DiscoveredServer
         {
             public string IP { get; set; }

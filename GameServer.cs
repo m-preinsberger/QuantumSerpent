@@ -6,10 +6,11 @@ namespace QuantumSerpent
 {
     public class GameServer
     {
-        private int port;
-        private TcpListener listener;
-        private UdpClient broadcaster;
+        private int port; // Server port.
+        private TcpListener listener; // Listens for TCP connections.
+        private UdpClient broadcaster; // Broadcasts server presence.
 
+        // Initializes server with specified port.
         public GameServer(int port)
         {
             this.port = port;
@@ -17,13 +18,15 @@ namespace QuantumSerpent
             broadcaster = new UdpClient();
         }
 
+        // Starts the server: begins listening and broadcasting.
         public void Start()
         {
-            listener.Start();
-            StartBroadcasting();
-            // Additional server logic
+            listener.Start(); // Start listening for TCP connections.
+            StartBroadcasting(); // Start broadcasting server presence.
+                                 // Additional server logic
         }
 
+        // Broadcasts server presence over UDP.
         private void StartBroadcasting()
         {
             IPEndPoint broadcastEndpoint = new IPEndPoint(IPAddress.Broadcast, 5001);

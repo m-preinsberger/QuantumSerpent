@@ -4,64 +4,73 @@ using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 
+// Namespace for the Quantum Serpent game, containing all classes related to the game
 namespace QuantumSerpent
 {
+    // Main form class for the Quantum Serpent game, inheriting from Form
     public partial class MainForm : Form
     {
-        private System.Windows.Forms.Timer gameTimer;
-        private PictureBox gameBoard;
-        private Label statusLabel;
-        private List<Player> players = new List<Player>();
-        private List<Food> foodItems = new List<Food>();
-        private Bitmap offscreenBitmap;
-        private Graphics offscreenGraphics;
-        private bool isGameOver = false;
-        private string gameMode;
-        private int aiPlayerCount;
-        private Random random;
-        private int fps;
-        private int appleCount;
-        private int foodGrowMultiplier;
-        private float moveSpeed = 2.0f;
-        private Dictionary<string, int> playerScores = new Dictionary<string, int>();
-        private System.Windows.Forms.Timer countdownTimer; // Timer for countdown
+        // Declaration of variables and UI elements used in the game
+        private System.Windows.Forms.Timer gameTimer; // Timer to control game updates
+        private PictureBox gameBoard; // PictureBox acting as the game board
+        private Label statusLabel; // Label to display game status
+        private List<Player> players = new List<Player>(); // List of players in the game
+        private List<Food> foodItems = new List<Food>(); // List of food items on the game board
+        private Bitmap offscreenBitmap; // Bitmap for double buffering to reduce flicker
+        private Graphics offscreenGraphics; // Graphics object for drawing on the offscreen bitmap
+        private bool isGameOver = false; // Flag to indicate if the game is over
+        private string gameMode; // String to store the selected game mode
+        private int aiPlayerCount; // Number of AI players in the game
+        private Random random; // Random object for generating random values
+        private int fps; // Frames per second for the game timer
+        private int appleCount; // Number of apples (food items) to spawn
+        private int foodGrowMultiplier; // Multiplier for how much the player grows after eating food
+        private float moveSpeed = 2.0f; // Speed at which players move
+        private Dictionary<string, int> playerScores = new Dictionary<string, int>(); // Dictionary to keep track of player scores
+        private System.Windows.Forms.Timer countdownTimer; // Timer for countdown before game starts
         private int timeRemaining; // Time remaining for the countdown
 
+        // Constructor for MainForm, initializes game settings based on selected mode and AI players
         public MainForm(string selectedGameMode, int aiPlayers)
         {
-            gameMode = selectedGameMode;
-            aiPlayerCount = aiPlayers;
-            random = new Random();
-            InitializeComponent();
-            InitializeGame();
+            gameMode = selectedGameMode; // Set the game mode based on the selected option
+            aiPlayerCount = aiPlayers; // Set the number of AI players
+            random = new Random(); // Initialize the random object
+            InitializeComponent(); // Initialize the form components
+            InitializeGame(); // Call the method to initialize game settings and start the game
         }
 
+        // Initializes game settings, players, and starts the game timer
         private void InitializeGame()
         {
-            var settings = GameSettingsManager.Load();
+            var settings = GameSettingsManager.Load(); // Load game settings from a configuration file or object
 
+            // Load game settings from the settings object
             fps = settings.FPS;
             appleCount = settings.AppleCount;
             foodGrowMultiplier = settings.FoodGrowMultiplier;
-            gameTimer.Interval = 1000 / fps;
+            gameTimer.Interval = 1000 / fps; // Set the game timer interval based on the desired FPS
 
+            // Reset game state for a new game
             players.Clear();
             foodItems.Clear();
             playerScores.Clear();
             if (settings.IsFatSerpentMode)
             {
-                StartCountdown(settings.FatSerpentTimeFrame);
+                StartCountdown(settings.FatSerpentTimeFrame); // Start countdown if Fat Serpent mode is enabled
             }
 
+            // Initialize players based on the selected game mode
             if (gameMode == "Singleplayer")
             {
-                InitializeSinglePlayer(settings);
+                InitializeSinglePlayer(settings); // Initialize a single player game
             }
             else if (gameMode == "Multiplayer")
             {
-                InitializeMultiPlayer(settings);
+                InitializeMultiPlayer(settings); // Initialize a multiplayer game
             }
 
+            // Add AI players to the game based on the number specified in settings
             for (int i = 0; i < settings.AIPlayers; i++)
             {
                 players.Add(new AIPlayer(
@@ -74,148 +83,180 @@ namespace QuantumSerpent
                 ));
             }
 
+            // Generate initial food items on the game board
             for (int i = 0; i < appleCount; i++)
             {
-                foodItems.Add(GenerateRandomFood());
+                foodItems.Add(GenerateRandomFood()); // Add a new food item at a random location
             }
 
+            // Start the game timer to begin game updates
             gameTimer.Start();
         }
 
+        // Generates a random food item on the game board
         private Food GenerateRandomFood()
         {
-            int x = random.Next(0, gameBoard.Width - 20);
-            int y = random.Next(0, gameBoard.Height - 20);
-            return new Apple(new Point(x, y));
+            int x = random.Next(0, gameBoard.Width - 20); // Generate a random X position within the game board bounds
+            int y = random.Next(0, gameBoard.Height - 20); // Generate a random Y position within the game board bounds
+            return new Apple(new Point(x, y)); // Return a new Apple object at the generated position
         }
 
+        // Initializes a single player game with settings from the GameSettings object
         private void InitializeSinglePlayer(GameSettings settings)
         {
-            var player1StartPos = new Point(100, 200);
+            var player1StartPos = new Point(100, 200); // Define a starting position for player 1
             players.Add(new Player(
-                settings.Player1Name,
-                settings.Player1HeadColor,
-                settings.Player1BodyColor,
-                player1StartPos,
-                Direction.Right,
-                settings.InitialPlayerLength
+                settings.Player1Name, // Player name from settings
+                settings.Player1HeadColor, // Head color from settings
+                settings.Player1BodyColor, // Body color from settings
+                player1StartPos, // Starting position
+                Direction.Right, // Initial direction
+                settings.InitialPlayerLength // Initial length
             ));
-            playerScores[settings.Player1Name] = 0;
+            playerScores[settings.Player1Name] = 0; // Initialize player 1's score to 0
         }
 
+        // Initializes a multiplayer game with settings from the GameSettings object
         private void InitializeMultiPlayer(GameSettings settings)
         {
+            // Add player 1 with specified settings
             players.Add(new Player(
-                settings.Player1Name,
-                settings.Player1HeadColor,
-                settings.Player1BodyColor,
-                new Point(100, 200),
-                Direction.Right,
-                settings.InitialPlayerLength
+                settings.Player1Name, // Name of player 1 from settings
+                settings.Player1HeadColor, // Head color for player 1 from settings
+                settings.Player1BodyColor, // Body color for player 1 from settings
+                new Point(100, 200), // Starting position for player 1
+                Direction.Right, // Initial direction for player 1
+                settings.InitialPlayerLength // Initial length for player 1
             ));
-            playerScores[settings.Player1Name] = 0;
+            playerScores[settings.Player1Name] = 0; // Initialize player 1's score to 0
 
+            // Add player 2 with specified settings
             players.Add(new Player(
-                settings.Player2Name,
-                settings.Player2HeadColor,
-                settings.Player2BodyColor,
-                new Point(400, 400),
-                Direction.Left,
-                settings.InitialPlayerLength
+                settings.Player2Name, // Name of player 2 from settings
+                settings.Player2HeadColor, // Head color for player 2 from settings
+                settings.Player2BodyColor, // Body color for player 2 from settings
+                new Point(400, 400), // Starting position for player 2
+                Direction.Left, // Initial direction for player 2
+                settings.InitialPlayerLength // Initial length for player 2
             ));
-            playerScores[settings.Player2Name] = 0;
+            playerScores[settings.Player2Name] = 0; // Initialize player 2's score to 0
         }
 
+        // Generates a spawn point for a player that is a safe distance away from another player
         private Point GenerateSafeSpawnPoint(Point otherPlayerPos, Size boardSize)
         {
-            int safeDistance = 100;
-            Point newSpawnPoint;
-            Random rand = new Random();
+            int safeDistance = 100; // Minimum safe distance from another player
+            Point newSpawnPoint; // Variable to hold the new spawn point
+            Random rand = new Random(); // Random object for generating random positions
             do
             {
+                // Generate a random position within the game board bounds, ensuring it's a safe distance from the edges
                 int x = rand.Next(safeDistance, boardSize.Width - safeDistance);
                 int y = rand.Next(safeDistance, boardSize.Height - safeDistance);
                 newSpawnPoint = new Point(x, y);
             } while (Math.Abs(newSpawnPoint.X - otherPlayerPos.X) < safeDistance &&
-                     Math.Abs(newSpawnPoint.Y - otherPlayerPos.Y) < safeDistance);
+                     Math.Abs(newSpawnPoint.Y - otherPlayerPos.Y) < safeDistance); // Repeat until a safe distance is achieved
 
-            return newSpawnPoint;
+            return newSpawnPoint; // Return the generated safe spawn point
         }
 
+        // Event handler for painting the game board
         private void GameBoard_Paint(object sender, PaintEventArgs e)
         {
-            if (players == null) return;
+            if (players == null) return; // Exit if there are no players
 
+            // Clear the offscreen bitmap to prepare for a new frame
             offscreenGraphics.Clear(Color.LightGray);
+
+            // Draw each player on the game board
             foreach (var player in players)
             {
+                // Draw each body part of the player
                 foreach (var part in player.BodyParts)
                 {
                     offscreenGraphics.FillRectangle(new SolidBrush(player.BodyColor), new Rectangle(part, new Size(20, 20)));
                 }
+                // Draw the player's head with a different color
                 offscreenGraphics.FillRectangle(new SolidBrush(player.HeadColor), new Rectangle(player.BodyParts[0], new Size(20, 20)));
             }
 
+            // Draw each food item on the game board
             foreach (var food in foodItems)
             {
-                food.Draw(offscreenGraphics);
+                food.Draw(offscreenGraphics); // Call the Draw method of each food item
             }
 
-            // Draw the scores
-            var font = new Font("Arial", 16);
-            var brush = new SolidBrush(Color.Black);
-            float yPosition = 10;
+            // Draw player scores on the game board
+            var font = new Font("Arial", 16); // Font for displaying scores
+            var brush = new SolidBrush(Color.Black); // Brush for drawing text
+            float yPosition = 10; // Initial Y position for the first score
 
+            // Display each player's score
             foreach (var player in players)
             {
                 offscreenGraphics.DrawString($"{player.Name}: {playerScores[player.Name]}", font, brush, new PointF(10, yPosition));
-                yPosition += 30;
+                yPosition += 30; // Increment Y position for the next score
             }
 
+            // Copy the offscreen bitmap to the screen to display the frame
             e.Graphics.DrawImage(offscreenBitmap, 0, 0);
         }
 
+        // Event handler for the game timer tick, which is called at every interval of the game timer
         private void GameTimer_Tick(object sender, EventArgs e)
         {
+            // Check if there are no players or if the game has ended, and exit the method if so
             if (players == null || isGameOver) return;
 
+            // Collect positions of all food items and obstacles (player body parts) for collision detection
             var foodPositions = foodItems.Select(food => food.Position).ToList();
             var obstacles = players.SelectMany(player => player.BodyParts).ToList();
 
+            // Iterate through each player to update their state
             foreach (var player in players)
             {
+                // If the player is an AI, use AI logic to move
                 if (player is AIPlayer aiPlayer)
                 {
                     aiPlayer.MoveAI(gameBoard.Size, foodPositions, obstacles);
                 }
                 else
                 {
+                    // For human players, move based on their current direction
                     MovePlayer(player);
                 }
 
+                // Update the position of the player's last body part
                 player.UpdateLastBodyPartPosition();
 
+                // Check if the player has consumed any food and handle growth and scoring
                 CheckFoodConsumption(player);
 
+                // Check for collisions with other players or the game board boundaries
                 var collisionResult = CollisionHelper.CheckCollisions(player, players, gameBoard.Size);
                 if (collisionResult.Type != CollisionHelper.CollisionType.None)
                 {
+                    // If a collision occurs, end the game and display a message
                     EndGame(collisionResult.Message);
                     return;
                 }
             }
 
+            // Invalidate the game board to trigger a repaint and update the game's visual state
             gameBoard.Invalidate();
-            statusLabel.Text = "Status: Running";
+            statusLabel.Text = "Status: Running"; // Update the status label to indicate the game is running
         }
 
+        // Moves the player based on their current direction
         private void MovePlayer(Player player)
         {
+            // Update the position of each body part to follow the one in front of it
             for (int i = player.BodyParts.Count - 1; i > 0; i--)
             {
                 player.BodyParts[i] = player.BodyParts[i - 1];
             }
 
+            // Move the head of the player in the direction they are facing
             switch (player.Direction)
             {
                 case Direction.Up:
@@ -232,6 +273,7 @@ namespace QuantumSerpent
                     break;
             }
 
+            // Ensure the player's head does not move outside the game board boundaries
             var head = player.BodyParts[0];
             player.BodyParts[0] = new Point(
                 Math.Max(0, Math.Min(gameBoard.Width - 20, head.X)),
@@ -239,60 +281,47 @@ namespace QuantumSerpent
             );
         }
 
+        // Checks if the player has consumed any food and updates the game state accordingly
         private void CheckFoodConsumption(Player player)
         {
+            // Create a rectangle around the player's head for collision detection with food
             Rectangle playerHeadRect = new Rectangle(player.BodyParts[0], new Size(20, 20));
 
+            // Iterate through the food items in reverse to safely remove items while iterating
             for (int i = foodItems.Count - 1; i >= 0; i--)
             {
                 Food food = foodItems[i];
                 Rectangle foodRect = new Rectangle(food.Position, new Size(20, 20));
 
+                // Check for collision between the player's head and a food item
                 if (playerHeadRect.IntersectsWith(foodRect))
                 {
+                    // Increase the player's body size and score for each food item consumed
                     for (int j = 0; j < foodGrowMultiplier; j++)
                     {
                         player.AddBodyPart();
                     }
 
+                    // Remove the consumed food item and replace it with a new one
                     foodItems.RemoveAt(i);
                     foodItems.Add(GenerateRandomFood());
 
+                    // Update the player's score based on their body length
                     playerScores[player.Name] = player.BodyParts.Count;
                 }
             }
         }
 
+        // Ends the game and displays a message to the player
         private void EndGame(string message)
         {
             if (!isGameOver)
             {
-                isGameOver = true;
-                MessageBox.Show(message, "Game Over", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                SaveHighscores();
-                gameTimer.Stop();
-                this.Close();
-                ShowStartForm();
-            }
-            if (countdownTimer != null)
-            {
-                int max;
-                // If the game mode is Fat Serpent mode, the game ends when the countdown timer reaches 0
-                //The player with the longest snake wins
-
-                // Find the player with the longest snake
-                var longestSnakePlayer = players.OrderByDescending(p => p.BodyParts.Count).First();
-                max = longestSnakePlayer.BodyParts.Count;
-
-                //Return a Messagebox with the winning message
-                MessageBox.Show($"Fat Serpent mode ended. {longestSnakePlayer.Name} wins with a snake length of {max}!", "Game Over", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-                countdownTimer.Stop();
-                gameTimer.Stop();
-                this.Close();
-                ShowStartForm();
+                isGameOver = true; // Set the game over flag to true
+                MessageBox.Show(message, "Game Over"); // Show a game over message box with the provided message
             }
         }
+
         private void StartCountdown(int initialTime)
         {
             timeRemaining = initialTime;
@@ -341,24 +370,27 @@ namespace QuantumSerpent
             GameSettingsManager.SaveHighscores(highscores);
         }
 
+        // Method to show the start form. If it's already open, it brings it to the front.
         private void ShowStartForm()
         {
             var startForm = Application.OpenForms.OfType<StartForm>().FirstOrDefault();
             if (startForm == null)
             {
                 startForm = new StartForm();
-                startForm.Show();
+                startForm.Show(); // If the StartForm is not open, create and show it.
             }
             else
             {
-                startForm.Show();
+                startForm.Show(); // If the StartForm is already open, just bring it to the front.
             }
         }
 
+        // Handles key down events to change the direction of players based on the pressed key.
         private void MainForm_KeyDown(object sender, KeyEventArgs e)
         {
-            if (players == null) return;
+            if (players == null) return; // If there are no players, do nothing.
 
+            // Change the direction of the first player based on WASD keys, ensuring they can't reverse directly.
             switch (e.KeyCode)
             {
                 case Keys.W:
@@ -377,6 +409,7 @@ namespace QuantumSerpent
                     if (players[0].Direction != Direction.Left)
                         players[0].Direction = Direction.Right;
                     break;
+                // For multiplayer, change the direction of the second player based on arrow keys.
                 case Keys.Up:
                     if (players.Count > 1 && players[1].Direction != Direction.Down)
                         players[1].Direction = Direction.Up;
@@ -397,11 +430,16 @@ namespace QuantumSerpent
         }
 
 
+        // Gathers and returns information about the game world, including positions to avoid, food locations, and board dimensions.
         private (IEnumerable<Position> avoid, IEnumerable<Food> food, (int, int)) GetWorldInfo()
         {
+            // Collect positions of all player body parts to avoid.
             var avoid = players.SelectMany(p => p.BodyParts).Select(p => new Position(p.X, p.Y)).ToList();
+            // Collect all current food items on the board.
             var food = foodItems.ToList();
+            // Return the collected information along with the game board dimensions.
             return (avoid, food, (gameBoard.Width, gameBoard.Height));
         }
     }
 }
+
