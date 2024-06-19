@@ -42,11 +42,16 @@
             colorDialog = new ColorDialog();
             DifficultyLabel = new Label();
             dificultyCBox = new ComboBox();
+            fatSerpentCheckBox = new CheckBox();
+            countdownNumericUpDown = new NumericUpDown();
+            label1 = new Label();
+            fatserpentlabel = new Label();
             ((System.ComponentModel.ISupportInitialize)aiPlayersNumericUpDown).BeginInit();
             ((System.ComponentModel.ISupportInitialize)initialPlayerLengthNumericUpDown).BeginInit();
             ((System.ComponentModel.ISupportInitialize)fpsNumericUpDown).BeginInit();
             ((System.ComponentModel.ISupportInitialize)appleCountNumericUpDown).BeginInit();
             ((System.ComponentModel.ISupportInitialize)foodGrowMultiplierNumericUpDown).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)countdownNumericUpDown).BeginInit();
             SuspendLayout();
             // 
             // player1NameTextBox
@@ -161,7 +166,7 @@
             // 
             // saveButton
             // 
-            saveButton.Location = new Point(58, 446);
+            saveButton.Location = new Point(58, 475);
             saveButton.Margin = new Padding(4, 3, 4, 3);
             saveButton.Name = "saveButton";
             saveButton.Size = new Size(117, 27);
@@ -172,7 +177,7 @@
             // 
             // backButton
             // 
-            backButton.Location = new Point(292, 446);
+            backButton.Location = new Point(291, 475);
             backButton.Margin = new Padding(4, 3, 4, 3);
             backButton.Name = "backButton";
             backButton.Size = new Size(117, 27);
@@ -311,11 +316,49 @@
             dificultyCBox.Size = new Size(121, 23);
             dificultyCBox.TabIndex = 26;
             // 
+            // fatSerpentCheckBox
+            // 
+            fatSerpentCheckBox.AutoSize = true;
+            fatSerpentCheckBox.Location = new Point(175, 407);
+            fatSerpentCheckBox.Name = "fatSerpentCheckBox";
+            fatSerpentCheckBox.Size = new Size(15, 14);
+            fatSerpentCheckBox.TabIndex = 27;
+            fatSerpentCheckBox.UseVisualStyleBackColor = true;
+            // 
+            // countdownNumericUpDown
+            // 
+            countdownNumericUpDown.Location = new Point(175, 441);
+            countdownNumericUpDown.Name = "countdownNumericUpDown";
+            countdownNumericUpDown.Size = new Size(47, 23);
+            countdownNumericUpDown.TabIndex = 28;
+            // 
+            // label1
+            // 
+            label1.AutoSize = true;
+            label1.Location = new Point(58, 443);
+            label1.Name = "label1";
+            label1.Size = new Size(77, 15);
+            label1.TabIndex = 29;
+            label1.Text = "Count Down:";
+            // 
+            // fatserpentlabel
+            // 
+            fatserpentlabel.AutoSize = true;
+            fatserpentlabel.Location = new Point(58, 406);
+            fatserpentlabel.Name = "fatserpentlabel";
+            fatserpentlabel.Size = new Size(68, 15);
+            fatserpentlabel.TabIndex = 30;
+            fatserpentlabel.Text = "Fat-Serpent";
+            // 
             // SettingsForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(467, 485);
+            ClientSize = new Size(467, 514);
+            Controls.Add(fatserpentlabel);
+            Controls.Add(label1);
+            Controls.Add(countdownNumericUpDown);
+            Controls.Add(fatSerpentCheckBox);
             Controls.Add(dificultyCBox);
             Controls.Add(DifficultyLabel);
             Controls.Add(player2NameLabel);
@@ -350,6 +393,7 @@
             ((System.ComponentModel.ISupportInitialize)fpsNumericUpDown).EndInit();
             ((System.ComponentModel.ISupportInitialize)appleCountNumericUpDown).EndInit();
             ((System.ComponentModel.ISupportInitialize)foodGrowMultiplierNumericUpDown).EndInit();
+            ((System.ComponentModel.ISupportInitialize)countdownNumericUpDown).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -381,5 +425,9 @@
         private System.Windows.Forms.ColorDialog colorDialog;
         private Label DifficultyLabel;
         private ComboBox dificultyCBox;
+        private CheckBox fatSerpentCheckBox;
+        private NumericUpDown countdownNumericUpDown;
+        private Label label1;
+        private Label fatserpentlabel;
     }
 }

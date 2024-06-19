@@ -24,6 +24,8 @@ namespace QuantumSerpent
         private int foodGrowMultiplier;
         private float moveSpeed = 2.0f;
         private Dictionary<string, int> playerScores = new Dictionary<string, int>();
+        private System.Windows.Forms.Timer countdownTimer; // Timer for countdown
+        private int timeRemaining; // Time remaining for the countdown
 
         public MainForm(string selectedGameMode, int aiPlayers)
         {
@@ -46,6 +48,10 @@ namespace QuantumSerpent
             players.Clear();
             foodItems.Clear();
             playerScores.Clear();
+            if (settings.IsFatSerpentMode)
+            {
+                StartCountdown(settings.FatSerpentTimeFrame);
+            }
 
             if (gameMode == "Singleplayer")
             {
@@ -268,6 +274,44 @@ namespace QuantumSerpent
                 this.Close();
                 ShowStartForm();
             }
+            if (countdownTimer != null)
+            {
+                int max;
+                // If the game mode is Fat Serpent mode, the game ends when the countdown timer reaches 0
+                //The player with the longest snake wins
+
+                // Find the player with the longest snake
+                var longestSnakePlayer = players.OrderByDescending(p => p.BodyParts.Count).First();
+                max = longestSnakePlayer.BodyParts.Count;
+
+                //Return a Messagebox with the winning message
+                MessageBox.Show($"Fat Serpent mode ended. {longestSnakePlayer.Name} wins with a snake length of {max}!", "Game Over", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                countdownTimer.Stop();
+                gameTimer.Stop();
+                this.Close();
+                ShowStartForm();
+            }
+        }
+        private void StartCountdown(int initialTime)
+        {
+            timeRemaining = initialTime;
+            countdownLabel.Text = $"Time Remaining: {timeRemaining}s";
+            countdownTimer = new System.Windows.Forms.Timer();
+            countdownTimer.Interval = 1000; // 1 second intervals
+            countdownTimer.Tick += CountdownTimer_Tick;
+            countdownTimer.Start();
+        }
+        private void CountdownTimer_Tick(object sender, EventArgs e)
+        {
+            timeRemaining--;
+            countdownLabel.Text = $"Time Remaining: {timeRemaining}s";
+
+            if (timeRemaining <= 0)
+            {
+                countdownTimer.Stop();
+                EndGame("Time's up! Fat Serpent mode ended.");
+            }
         }
 
         private void SaveHighscores()
@@ -351,6 +395,7 @@ namespace QuantumSerpent
                     break;
             }
         }
+
 
         private (IEnumerable<Position> avoid, IEnumerable<Food> food, (int, int)) GetWorldInfo()
         {

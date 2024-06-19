@@ -58,7 +58,9 @@ namespace QuantumSerpent
                 AIPlayers = (int)aiPlayersNumericUpDown.Value,
                 FPS = (int)fpsNumericUpDown.Value,
                 AppleCount = (int)appleCountNumericUpDown.Value,
-                FoodGrowMultiplier = (int)foodGrowMultiplierNumericUpDown.Value
+                FoodGrowMultiplier = (int)foodGrowMultiplierNumericUpDown.Value,
+                IsFatSerpentMode = fatSerpentCheckBox.Checked,
+                FatSerpentTimeFrame = (int)countdownNumericUpDown.Value
             };
 
             GameSettingsManager.Save(settings);

@@ -76,6 +76,8 @@ namespace QuantumSerpent
         public int AppleCount { get; set; } = 5;
         public int FoodGrowMultiplier { get; set; } = 1;
         public string Difficulty { get; set; } = "medium";
+        public bool IsFatSerpentMode { get; set; } = false; // Default value
+        public int FatSerpentTimeFrame { get; set; } = 0;   // Default value in seconds
     }
 
 }

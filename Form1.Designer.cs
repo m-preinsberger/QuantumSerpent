@@ -6,6 +6,7 @@
         ///  Required designer variable.
         /// </summary>
         private System.ComponentModel.IContainer components = null;
+        private Label countdownLabel;  // New countdown label
 
         /// <summary>
         ///  Clean up any resources being used.
@@ -48,6 +49,15 @@
                 Size = new Size(100, 23),
                 Text = "Status: Ready"
             };
+            // CountdownLabel
+            this.countdownLabel = new System.Windows.Forms.Label();
+            this.countdownLabel.AutoSize = true;
+            this.countdownLabel.Location = new System.Drawing.Point(820, 260); // Adjust position as needed
+            this.countdownLabel.Name = "countdownLabel";
+            this.countdownLabel.Size = new System.Drawing.Size(150, 23);
+            this.countdownLabel.TabIndex = 3;
+            this.countdownLabel.Text = "Time Remaining: ";
+            this.Controls.Add(this.countdownLabel);
 
             this.ClientSize = new Size(940, 620);
             this.Controls.Add(this.gameBoard);
