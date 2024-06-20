@@ -56,9 +56,11 @@ namespace QuantumSerpent
             players.Clear();
             foodItems.Clear();
             playerScores.Clear();
+
+            // Start countdown if Fat Serpent mode is enabled
             if (settings.IsFatSerpentMode)
             {
-                StartCountdown(settings.FatSerpentTimeFrame); // Start countdown if Fat Serpent mode is enabled
+                StartCountdown(settings.FatSerpentTimeFrame);
             }
 
             // Initialize players based on the selected game mode
@@ -74,14 +76,18 @@ namespace QuantumSerpent
             // Add AI players to the game based on the number specified in settings
             for (int i = 0; i < settings.AIPlayers; i++)
             {
-                players.Add(new AIPlayer(
+                var aiPlayer = new AIPlayer(
                     $"AIPlayer{i + 1}",
-                    Color.Yellow,
+                    Color.Red,
                     Color.Green,
-                    GenerateSafeSpawnPoint(new Point(0, 0), gameBoard.Size),
+                    GenerateSafeSpawnPoint(new Point(0, 0), gameBoard.Size), // Generate a safe spawn point for AI
                     Direction.Right,
-                    settings.InitialPlayerLength
-                ));
+                    settings.InitialPlayerLength,
+                    GetWorldInfo // Pass the WorldInfo function
+                );
+
+                players.Add(aiPlayer);
+                playerScores[aiPlayer.Name] = 0; // Add AI player to the playerScores dictionary
             }
 
             // Generate initial food items on the game board
@@ -219,7 +225,7 @@ namespace QuantumSerpent
                 // If the player is an AI, use AI logic to move
                 if (player is AIPlayer aiPlayer)
                 {
-                    aiPlayer.MoveAI(gameBoard.Size, foodPositions, obstacles);
+                    aiPlayer.MoveAI();
                 }
                 else
                 {
@@ -266,7 +272,7 @@ namespace QuantumSerpent
                 players.Remove(player);
             }
             deadPlayers.Clear();
-        }
+        }   
 
         // Moves the player based on their current direction
         private void MovePlayer(Player player)
@@ -336,17 +342,17 @@ namespace QuantumSerpent
             }
         }
 
-        // Ends the game and displays a message to the player
+        // Ends the game and shows the end message
         private void EndGame(string message)
         {
             if (!isGameOver)
             {
-                isGameOver = true; // Set the game over flag to true
-                MessageBox.Show(message, "Game Over"); // Show a game over message box with the provided message
+                isGameOver = true;
+                MessageBox.Show(message, "Game Over", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 SaveHighscores();
                 gameTimer.Stop();
-                this.FormClosed += MainForm_FormClosed;
                 this.Close();
+                ShowStartForm();
             }
         }
 
@@ -462,15 +468,13 @@ namespace QuantumSerpent
         }
 
 
-        // Gathers and returns information about the game world, including positions to avoid, food locations, and board dimensions.
-        private (IEnumerable<Position> avoid, IEnumerable<Food> food, (int, int)) GetWorldInfo()
+        private (IEnumerable<Point> avoid, IEnumerable<Food> food, int maxWidth, int maxHeight) GetWorldInfo()
         {
-            // Collect positions of all player body parts to avoid.
-            var avoid = players.SelectMany(p => p.BodyParts).Select(p => new Position(p.X, p.Y)).ToList();
-            // Collect all current food items on the board.
+            var avoid = players.SelectMany(p => p.BodyParts).ToList();
             var food = foodItems.ToList();
-            // Return the collected information along with the game board dimensions.
-            return (avoid, food, (gameBoard.Width, gameBoard.Height));
+            int maxWidth = gameBoard.Width;
+            int maxHeight = gameBoard.Height;
+            return (avoid, food, maxWidth, maxHeight);
         }
     }
 }

@@ -1,91 +1,160 @@
-﻿// File: AIPlayer.cs
-using System;
-using System.Drawing;
+﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Linq;
 
 namespace QuantumSerpent
 {
-    // AIPlayer extends Player to implement AI-controlled movement.
+    // Define the WorldInfoFunction delegate in a public scope for accessibility.
+    public delegate (IEnumerable<Point> avoid, IEnumerable<Food> food, int maxWidth, int maxHeight) WorldInfoFunction();
+
     public class AIPlayer : Player
     {
-        private Random random; // Used for generating random decisions, if needed.
-        private List<Point> currentPath; // Stores the current path to the target.
-        private int pathIndex; // Index to track the current position in the path.
+        public WorldInfoFunction GetWorldInfo { get; set; }
 
-        // Constructor: Initializes AIPlayer with base player attributes and AI-specific fields.
-        public AIPlayer(string name, Color headColor, Color bodyColor, Point startPosition, Direction startDirection, int initialLength)
+        private Random random;
+        private List<Point> currentPath;
+        private int pathIndex;
+
+        public AIPlayer(string name, Color headColor, Color bodyColor, Point startPosition, Direction startDirection, int initialLength, WorldInfoFunction getWorldInfo)
             : base(name, headColor, bodyColor, startPosition, startDirection, initialLength)
         {
+            GetWorldInfo = getWorldInfo;
             random = new Random();
             currentPath = new List<Point>();
             pathIndex = 0;
         }
 
-        // Determines and executes the next move based on the path to the closest food.
-        public void MoveAI(Size gameBoardSize, List<Point> foodPositions, List<Point> obstacles)
+        private Point? GetClosestFood(IEnumerable<Food> food, IEnumerable<Point> avoid)
         {
-            // If there's no current path or the path is complete, find a new path to the closest food.
-            if (currentPath == null || pathIndex >= currentPath.Count)
+            var closest = food.OrderBy(f => Distance(f.Position, BodyParts[0])).FirstOrDefault(f => !avoid.Contains(f.Position));
+            return closest?.Position;
+        }
+
+        public void MoveAI()
+        {
+            // Properly invoke the delegate
+            var world = GetWorldInfo();
+            Point? closestFood = GetClosestFood(world.food, world.avoid);
+
+            if (closestFood == null)
             {
-                var target = SelectClosestFood(foodPositions);
-                if (target != null)
+                // No food found, move to a random empty field
+                var randomPosition = GetBestPath(world.avoid, world.maxWidth, world.maxHeight);
+                if (randomPosition != null)
                 {
-                    currentPath = AStarPathfinder.FindPath(BodyParts[0], target.Value, gameBoardSize, obstacles);
-                    pathIndex = 0;
+                    var direction = GetDirection(BodyParts[0], randomPosition.Value);
+                    Move(direction);
                 }
             }
-
-            // If there's a valid path, move towards the next point in the path.
-            if (currentPath != null && pathIndex < currentPath.Count)
+            else
             {
-                MoveTowards(currentPath[pathIndex]);
-                pathIndex++;
+                // Move towards food using pathfinding
+                var path = AStarAlgorithm(BodyParts[0], closestFood.Value, world.avoid, world.maxWidth, world.maxHeight);
+                if (path.Count > 1)
+                {
+                    var nextPosition = path[1];
+                    var direction = GetDirection(BodyParts[0], nextPosition);
+                    Move(direction);
+                }
             }
         }
 
-        // Selects the closest food item based on the heuristic distance.
-        private Point? SelectClosestFood(List<Point> foodPositions)
+        private Direction GetDirection(Point current, Point next)
         {
-            Point? closestFood = null;
-            float minDistance = float.MaxValue;
+            if (next.X < current.X) return Direction.Left;
+            if (next.X > current.X) return Direction.Right;
+            if (next.Y < current.Y) return Direction.Up;
+            return Direction.Down;
+        }
 
-            foreach (var food in foodPositions)
+        private List<Point> AStarAlgorithm(Point start, Point goal, IEnumerable<Point> avoid, int maxWidth, int maxHeight)
+        {
+            var openSet = new List<Point> { start };
+            var cameFrom = new Dictionary<Point, Point>();
+            var gScore = new Dictionary<Point, int> { [start] = 0 };
+            var fScore = new Dictionary<Point, int> { [start] = Distance(start, goal) };
+
+            while (openSet.Any())
             {
-                float distance = AStarPathfinder.Heuristic(BodyParts[0], food);
-                if (distance < minDistance)
+                var current = openSet.OrderBy(p => fScore.ContainsKey(p) ? fScore[p] : int.MaxValue).First();
+                if (current == goal) return ReconstructPath(cameFrom, current);
+
+                openSet.Remove(current);
+
+                foreach (var neighbor in GetNeighbors(current))
                 {
-                    minDistance = distance;
-                    closestFood = food;
+                    if (avoid.Contains(neighbor) || neighbor.X < 0 || neighbor.X >= maxWidth || neighbor.Y < 0 || neighbor.Y >= maxHeight)
+                        continue;
+
+                    var tentativeGScore = gScore[current] + 1;
+
+                    if (!gScore.ContainsKey(neighbor) || tentativeGScore < gScore[neighbor])
+                    {
+                        cameFrom[neighbor] = current;
+                        gScore[neighbor] = tentativeGScore;
+                        fScore[neighbor] = tentativeGScore + Distance(neighbor, goal);
+                        if (!openSet.Contains(neighbor)) openSet.Add(neighbor);
+                    }
                 }
             }
 
-            return closestFood;
+            return new List<Point>();
         }
 
-        // Sets the direction towards the target position and moves the AI player.
-        private void MoveTowards(Point targetPosition)
+        private List<Point> ReconstructPath(Dictionary<Point, Point> cameFrom, Point current)
         {
-            var currentPos = BodyParts[0];
+            var path = new List<Point> { current };
+            while (cameFrom.ContainsKey(current))
+            {
+                current = cameFrom[current];
+                path.Insert(0, current);
+            }
+            return path;
+        }
 
-            // Determine the direction based on the target position relative to the current position.
-            if (targetPosition.X < currentPos.X)
+        private IEnumerable<Point> GetNeighbors(Point position)
+        {
+            return new List<Point>
             {
-                Direction = Direction.Left;
-            }
-            else if (targetPosition.X > currentPos.X)
+                new Point(position.X, position.Y - 1),
+                new Point(position.X, position.Y + 1),
+                new Point(position.X - 1, position.Y),
+                new Point(position.X + 1, position.Y)
+            };
+        }
+
+        private static int Distance(Point a, Point b) => Math.Abs(a.X - b.X) + Math.Abs(a.Y - b.Y);
+
+        private Point? GetBestPath(IEnumerable<Point> avoid, int maxWidth, int maxHeight)
+        {
+            var emptyFields = GetEmptyFields(avoid, maxWidth, maxHeight);
+            if (emptyFields.Count == 0) return null;
+
+            return emptyFields[random.Next(emptyFields.Count)];
+        }
+
+        private List<Point> GetEmptyFields(IEnumerable<Point> avoid, int maxWidth, int maxHeight)
+        {
+            var emptyFields = new List<Point>();
+
+            var potentialMoves = new List<Point>
             {
-                Direction = Direction.Right;
-            }
-            else if (targetPosition.Y < currentPos.Y)
+                new Point(BodyParts[0].X, BodyParts[0].Y - 1),
+                new Point(BodyParts[0].X, BodyParts[0].Y + 1),
+                new Point(BodyParts[0].X - 1, BodyParts[0].Y),
+                new Point(BodyParts[0].X + 1, BodyParts[0].Y)
+            };
+
+            foreach (var move in potentialMoves)
             {
-                Direction = Direction.Up;
+                if (!avoid.Contains(move) && move.X >= 0 && move.X < maxWidth && move.Y >= 0 && move.Y < maxHeight)
+                {
+                    emptyFields.Add(move);
+                }
             }
-            else if (targetPosition.Y > currentPos.Y)
-            {
-                Direction = Direction.Down;
-            }
-            // Execute the move in the determined direction.
-            Move(Direction);
+
+            return emptyFields;
         }
     }
 }
