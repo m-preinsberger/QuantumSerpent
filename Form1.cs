@@ -29,6 +29,7 @@ namespace QuantumSerpent
         private Dictionary<string, int> playerScores = new Dictionary<string, int>(); // Dictionary to keep track of player scores
         private System.Windows.Forms.Timer countdownTimer; // Timer for countdown before game starts
         private int timeRemaining; // Time remaining for the countdown
+        private List<Player> deadPlayers = new List<Player>();
 
         // Constructor for MainForm, initializes game settings based on selected mode and AI players
         public MainForm(string selectedGameMode, int aiPlayers)
@@ -237,14 +238,34 @@ namespace QuantumSerpent
                 if (collisionResult.Type != CollisionHelper.CollisionType.None)
                 {
                     // If a collision occurs, end the game and display a message
-                    EndGame(collisionResult.Message);
+                    deadPlayers.Add(player);
+                    removeDeadPlayers();
+                    if (players.Count == 0)
+                    {
+                        EndGame(collisionResult.Message);
+                    }
                     return;
                 }
+
             }
 
             // Invalidate the game board to trigger a repaint and update the game's visual state
             gameBoard.Invalidate();
             statusLabel.Text = "Status: Running"; // Update the status label to indicate the game is running
+        }
+        private void removeDeadPlayers()
+        {
+            foreach (var player in deadPlayers)
+            {
+                foreach (var part in player.BodyParts)
+                {
+                    Apple apple = new Apple(part);
+                    apple.Respawn = false;
+                    foodItems.Add(apple);
+                }
+                players.Remove(player);
+            }
+            deadPlayers.Clear();
         }
 
         // Moves the player based on their current direction
@@ -304,7 +325,10 @@ namespace QuantumSerpent
 
                     // Remove the consumed food item and replace it with a new one
                     foodItems.RemoveAt(i);
-                    foodItems.Add(GenerateRandomFood());
+                    if (food.Respawn)
+                    {
+                        foodItems.Add(GenerateRandomFood());
+                    }
 
                     // Update the player's score based on their body length
                     playerScores[player.Name] = player.BodyParts.Count;

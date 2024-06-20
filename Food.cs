@@ -9,6 +9,9 @@ namespace QuantumSerpent
         // Property to get or set the position of the food
         public Point Position { get; set; }
 
+        //respawn propertie
+        public bool Respawn { get; set; }
+
         // Abstract method to be implemented by derived classes
         public abstract void Draw(Graphics g);
 

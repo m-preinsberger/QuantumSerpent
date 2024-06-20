@@ -10,12 +10,13 @@ namespace QuantumSerpent
         public Apple(Point position)
         {
             this.Position = position;
+            this.Respawn = true;
         }
 
         // Implement the Draw method to draw the apple on the screen
         public override void Draw(Graphics g)
         {
-            g.FillEllipse(Brushes.Red, new Rectangle(Position.X, Position.Y, 20, 20));
+            g.FillRectangle(Brushes.Red, new Rectangle(Position.X, Position.Y, 20, 20));
         }   
 
         // Implement the EatEffect method to define the effect of eating the apple
