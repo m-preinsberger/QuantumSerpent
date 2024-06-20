@@ -136,7 +136,7 @@ namespace QuantumSerpent
                 settings.Player2HeadColor, // Head color for player 2 from settings
                 settings.Player2BodyColor, // Body color for player 2 from settings
                 new Point(400, 400), // Starting position for player 2
-                Direction.Left, // Initial direction for player 2
+                Direction.Right, // Initial direction for player 2
                 settings.InitialPlayerLength // Initial length for player 2
             ));
             playerScores[settings.Player2Name] = 0; // Initialize player 2's score to 0
@@ -319,6 +319,10 @@ namespace QuantumSerpent
             {
                 isGameOver = true; // Set the game over flag to true
                 MessageBox.Show(message, "Game Over"); // Show a game over message box with the provided message
+                SaveHighscores();
+                gameTimer.Stop();
+                this.FormClosed += MainForm_FormClosed;
+                this.Close();
             }
         }
 
@@ -383,6 +387,10 @@ namespace QuantumSerpent
             {
                 startForm.Show(); // If the StartForm is already open, just bring it to the front.
             }
+        }
+        private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            Application.OpenForms["StartForm"]?.Show();
         }
 
         // Handles key down events to change the direction of players based on the pressed key.
